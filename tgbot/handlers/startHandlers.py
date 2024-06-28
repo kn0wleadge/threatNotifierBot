@@ -5,6 +5,9 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.methods.send_message import SendMessage
 
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.filters.callback_data import CallbackData
+
 from tgbot.keyboards.startKeyboards import startKeyboard
 from tgbot.keyboards.defaultKeyboards import defaultKeyboard
 from tgbot.keyboards.application_keyboard import application_markup
@@ -20,6 +23,9 @@ from bot_init import bot,dp
 import datetime
 
 import os
+class UserApplicationCallbackData(CallbackData, prefix = 'Application'):
+                state: bool
+                tg_id: int
 
 StartRouter = Router()
 
@@ -33,7 +39,7 @@ async def cmd_start(message: Message):
     print(f'is user exists? - {user}')
     if not user:
         user_application = await check_user_application(message.from_user.id)
-        print(f'user sent application? - {user_application}')
+        print(f'user sent application already? - {user_application}')
         #Если заявка уже подана
         if not user_application:
             #Получение списка tgid администраторов, которые будут принимать решение по приему пользователей
@@ -43,12 +49,21 @@ async def cmd_start(message: Message):
             #                    ,reply_markup=startKeyboard)
             await message.answer(f'Привет. Этот бот будет отправлять тебе информацию о последних опубликованных уязвимостях ПО.\nПодожди, пока администратор примет твою заявку.\n')
             application = {'tg_id': message.from_user.id, 'name':message.from_user.first_name, 'date': datetime.datetime.now()}
+
+            #Создание в БД записи о заявке этого пользователя
             await create_application(application)
+            
+            #Создание Inline клавиатуры, для ответа на заявку пользователя
+            builder = InlineKeyboardBuilder()
+            builder.button(text = 'Принять ✅', callback_data = UserApplicationCallbackData(state = True, tg_id = application['tg_id']).pack())
+            builder.button(text = 'Отклонить 🚫', callback_data = UserApplicationCallbackData(state = False, tg_id = application['tg_id']).pack())
+            
+            
             str = f"Следующий пользователь отправил заявку на использование бота.\nИмя пользователя - {application['name']}\nДата заявки - {application['date']}"
             for admin_id in admin_list:
                 print(admin_id)
                 await bot.send_message(chat_id= admin_id, text = str
-                                       ,reply_markup=application_markup)
+                                       ,reply_markup=builder.as_markup())
         else:
             await message.answer(f'Твоя заявка уже в обработке, подожди пока администратор её одобрит 🙂')
     else:
