@@ -69,6 +69,7 @@ class UsersApplication(Base):
     tg_id = mapped_column(BigInteger)
     name:Mapped[str] = mapped_column(String(50))
     application_date = mapped_column(DateTime)
+    is_applied:Mapped[bool] = mapped_column(nullable = True)
 
 
 async def async_main():

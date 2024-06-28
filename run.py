@@ -21,6 +21,7 @@ from bot_init import bot, dp
  
 from tgbot.handlers.startHandlers import StartRouter
 from tgbot.handlers.defaultHandlers import DefaultRouter
+from tgbot.handlers.new_user_handlers import NewUserRouter
 async def scheduled_task():
     data = await parse_data()
     print(data)
@@ -33,6 +34,7 @@ async def main():
     
     dp.include_router(StartRouter)
     dp.include_router(DefaultRouter)
+    dp.include_router(NewUserRouter)
     # Инициализация планировщика
     scheduler = AsyncIOScheduler()
     scheduler.add_job(scheduled_task, 'interval', minutes=30)
