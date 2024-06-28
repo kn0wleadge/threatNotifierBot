@@ -9,7 +9,7 @@ from aiogram.utils.formatting import Bold
 from tgbot.services.softwareListStrToTuple import softwareListStrToTuple
 
 from tgbot.database.requests import get_users_softlist,check_if_user_registrated, change_users_softlist
-import keyboards.defaultKeyboards as kb
+import tgbot.keyboards.defaultKeyboards as kb
 
 class Reg(StatesGroup):
     software_change_state = State()

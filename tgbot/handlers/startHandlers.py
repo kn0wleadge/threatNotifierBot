@@ -5,9 +5,9 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.methods.send_message import SendMessage
 
-from keyboards.startKeyboards import startKeyboard
-from keyboards.defaultKeyboards import defaultKeyboard
-from keyboards.application_keyboard import application_markup
+from tgbot.keyboards.startKeyboards import startKeyboard
+from tgbot.keyboards.defaultKeyboards import defaultKeyboard
+from tgbot.keyboards.application_keyboard import application_markup
 
 from tgbot.services.softwareListStrToTuple import softwareListStrToTuple
 
