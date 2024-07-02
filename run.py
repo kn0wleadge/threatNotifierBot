@@ -17,14 +17,22 @@ from tgbot.database.connect_soft import connect_soft
 
 from tgbot.database.add_threat import add_threat
 
+from tgbot.services.send_threat import send_threat
+
 from bot_init import bot, dp
  
 from tgbot.handlers.startHandlers import StartRouter
 from tgbot.handlers.defaultHandlers import DefaultRouter
 from tgbot.handlers.new_user_handlers import NewUserRouter
 async def scheduled_task():
-    data = await parse_data()
-    print(data)
+    threats_info = await parse_data()
+    print(f'added threats - {threats_info}')
+    print(f"count of threats - {len(threats_info)}")
+    for threat in threats_info:
+        
+        #Отправка пользователю информации об угрозе
+        print("Sending info")
+        await send_threat(threat)
 
 async def main():
           
@@ -42,7 +50,7 @@ async def main():
     logging.info("Scheduler started")
 
     # Запуск первого парсинга немедленно
-    #asyncio.create_task(scheduled_task())
+    asyncio.create_task(scheduled_task())
 
     # Запуск бота
     await dp.start_polling(bot)

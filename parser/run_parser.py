@@ -6,6 +6,7 @@ import time
 
 from tgbot.database.add_threat import add_threat
 from tgbot.database.connect_soft import connect_soft
+from tgbot.database.connect_user import connect_user
 
 from tgbot.services.find_soft_in_description import find_soft_in_description
 from tgbot.database.get_all_soft import get_all_soft
@@ -63,10 +64,13 @@ async def fetch_specific_info(page, url):
         data = []
     else:    
         soft_names = await get_all_soft()
-        if len(await find_soft_in_description(description=description_text, soft_names=soft_names)) == 0:
+        matched_soft = await find_soft_in_description(description=description_text, soft_names=soft_names)
+        if len(matched_soft) == 0:
             data = []
             print('---no needed soft---')
             print('---useless threat---')
+        else:
+            data["Soft"] = matched_soft
 
     return data
 
@@ -146,12 +150,21 @@ async def main():
     async with async_playwright() as playwright:
         #Парсинг данных об угрозах с сайта
         parsed_data = await run(playwright)
-
+        print('data parsed')
+        added_threats = []
         for threat in parsed_data:
 
             #Добавление угрозы в БД
-            await add_threat(threat)
-            #Добавление связи БД с софтом
-            await connect_soft(threat['url'])
+            threat_added:bool = await add_threat(threat)
 
-    return parsed_data
+            if threat_added:
+                #Добавление связи угрозы с софтом в БД
+                await connect_soft(threat['url'])
+
+                #Добавления связи угрозы с пользователем в БД
+                threat_with_id = await connect_user(threat)
+                added_threats.append(threat_with_id)
+
+                
+
+    return added_threats
