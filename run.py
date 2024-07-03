@@ -23,7 +23,7 @@ from bot_init import bot, dp
  
 from tgbot.handlers.startHandlers import StartRouter
 from tgbot.handlers.defaultHandlers import DefaultRouter
-from tgbot.handlers.new_user_handlers import NewUserRouter
+from tgbot.handlers.callback_handlers import CallbackRouter
 async def scheduled_task():
     threats_info = await parse_data()
     print(f'added threats - {threats_info}')
@@ -42,7 +42,7 @@ async def main():
     
     dp.include_router(StartRouter)
     dp.include_router(DefaultRouter)
-    dp.include_router(NewUserRouter)
+    dp.include_router(CallbackRouter)
     # Инициализация планировщика
     scheduler = AsyncIOScheduler()
     scheduler.add_job(scheduled_task, 'interval', minutes=30)

@@ -88,7 +88,11 @@ async def software_input(message: Message, state: FSMContext):
         await message.answer('Вы уже ввели список ПО!',
                             reply_markup= None)
 
-
+@StartRouter.message(F.text == 'Шпион бот начать')
+#TODO - продумать ситуацию, если человек нажал ввести список ПО, но при этом не ввёл его
+async def software_input(message: Message, state: FSMContext):
+    await message.answer(text = 'пошел нахуй')
+        
 @StartRouter.message(Reg.software_input_state)
 async def reg_two(message:Message, state: FSMContext):
     print('registrating new soft')
