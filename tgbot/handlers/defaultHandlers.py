@@ -9,6 +9,7 @@ from aiogram.utils.formatting import Bold
 from tgbot.services.softwareListStrToTuple import softwareListStrToTuple
 
 from tgbot.database.requests import get_users_softlist,check_if_user_registrated, change_users_softlist
+from tgbot.database.current_threats import current_threats
 import tgbot.keyboards.defaultKeyboards as kb
 
 class Reg(StatesGroup):
@@ -61,3 +62,17 @@ async def anotherfunc(message:Message,state:FSMContext):
     await change_users_softlist(message.from_user.id, software_list)
     await message.answer('Список ПО успешно изменен.')
     await state.clear()
+
+@DefaultRouter.message(Command('help'))
+async def anotherfunc(message:Message):
+    print('help command')
+    await message.answer('Этот бот будет оперативно отправлять вам информацию о новых угрозах, которые публикуются на онлайн-порталах угроз информационной безопасности. Перечень команд:\n/help -справочная информация\n/softlist - актуальный список выбранного вами ПО\n/change_softlist - изменить список ПО\n/threats - вывести угрозы, находящиеся в обработке\n/all_threats - вывести список всех решенных угроз')
+
+@DefaultRouter.message(Command('threats'))
+async def anotherfunc(message:Message):
+    #TODO - предусмотреть возможность отправки огромного количество угроз
+    print('help command')
+    threats = await current_threats(message.chat.id)
+    await message.answer(text = "Список обрабатываемых угроз:")
+    for threat in threats:        
+        await message.answer(text = threat['message'], reply_markup=threat['builder'].as_markup())
