@@ -36,7 +36,7 @@ async def current_threats(tg_id):
             builder.adjust(1)
             threat = {}
             threat['builder'] = builder
-            threat_message =f'{counter})'+ 'Описание угрозы:' + row.description + '\n' + 'Возможное решение:' + row.rec_solve + '\n'
+            threat_message =f'{counter})'+ f'Код угрозы - BDU:{row.url[25:]}\n' + 'Описание угрозы:' + row.description + '\n' + 'Возможное решение:' + row.rec_solve + '\n'
             threat['message'] = threat_message
             threats.append(threat)
         return threats
