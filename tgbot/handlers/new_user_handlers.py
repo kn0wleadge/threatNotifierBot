@@ -33,7 +33,7 @@ async def accept_user(query:CallbackQuery, callback_data:UserApplicationCallback
     await query.message.answer('Заявка пользователя успешно принята!')
     await create_user(callback_data.tg_id)
 
-    await bot.send_message(chat_id = callback_data.tg_id, text='Ваша заявка успешно принята!\nВоспользуйтесь командой /help, чтобы подробнее узнать о возможностях бота')
+    await bot.send_message(chat_id = callback_data.tg_id, text='Ваша заявка успешно принята!\nЧтобы ввести интересующее вас ПО, нажмите кнопку "Ввести список ПО"\nВоспользуйтесь командой /help, чтобы подробнее узнать о возможностях бота',reply_markup=startKeyboard)
 
 
 @NewUserRouter.callback_query(UserApplicationCallbackData.filter(F.state == False))

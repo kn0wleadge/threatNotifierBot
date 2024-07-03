@@ -27,11 +27,15 @@ import os
 
 async def send_threat(threat):
     print("send_threat: started sending...")
+    print(f"send_threat: threat users id - {threat['user id']}")
     try:  
-      await bot.send_message(chat_id = threat["id"],
-                            text = "Была обнаружена новая угроза!"
-                              )
-      await bot.send_message(chat_id = threat["id"], text = "Описание угрозы:\n" + threat["Description"] + '\n' + "Возможное решение:\n" + threat["Solving method"])
+      for id_group in (threat["user id"]):
+            for id in id_group:
+              print(f"user id - {id}")  
+              await bot.send_message(chat_id = id,
+                                  text = "Была обнаружена новая угроза!"
+                                    )
+              await bot.send_message(chat_id = id, text = "Описание угрозы:\n" + threat["Description"] + '\n\n' + "Возможное решение:\n" + threat["Solving method"] + '\n\n' + "Ссылка на полную информацию об угрозе:\n" + threat["url"])
     except Exception as e:
        print(f"Error occurred: {e}")
        

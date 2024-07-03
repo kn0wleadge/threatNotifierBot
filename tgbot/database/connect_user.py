@@ -23,7 +23,7 @@ async def get_users_by_soft(soft_id:list):
         users_id = []
         for id in soft_id:
             try:
-                user_id = await session.scalar(select(UsersSoft.id_user).where((UsersSoft.id_soft == id) & (UsersSoft.is_active == 1)))
+                user_id = (await session.scalars(select(UsersSoft.id_user).where((UsersSoft.id_soft == id) & (UsersSoft.is_active == 1)))).all()
                 users_id.append(user_id)
             except Exception as e:
                  print(f'Error while getting user id  - {e}')
@@ -36,9 +36,10 @@ async def connect_user(threat):
 
         try:
             threat_id:int = (await get_threatid(threat)).id
+            threat["id"] = threat_id
         except Exception as e:
             print(f'error while getting threat_id - {e}')
-        threat["id"] = threat_id
+        
 
         try:
             soft_id:list = await get_soft_id(threat['Soft'])
@@ -46,21 +47,26 @@ async def connect_user(threat):
             print(f'Error while getting softs id - {e}')
         
         try:
-            users_id:list = await get_users_by_soft(soft_id)
+            users_id_groups:list = await get_users_by_soft(soft_id)
+            threat["user id"] = users_id_groups
         except Exception as e:
-            print(f'Error while getting users id - {e}')
+            print(f'connect_user:Error while getting users id - {e}')
+        
 
         #Может быть несколько одинаковых id, так как в одной угрозе могут быть обноружены несколько ПО, которые привязаны к одному пользователю
-        for user_id in users_id:
-            print(f"user id - {user_id}, threat_id - {threat_id}")
-            try:
-                await session.execute(insert(UsersThreat).values(id_user = user_id,id_threat = threat_id,
-                                                             send_date = datetime.datetime.now(),threat_status = 'Undefined',
-                                                             ))
-                await session.commit()
-            except Exception as e:
-                print(f'Error while inserting into users_threat- {e}')
-        #Возвращается та же самая угроза, только в словаре еще хранится её id
+        for users_id in users_id_groups:
+            for id in users_id:
+                print(f"user id - {id}, threat_id - {threat_id}")
+                try:
+                    await session.execute(insert(UsersThreat).values(id_user = id,id_threat = threat_id,
+                                                                send_date = datetime.datetime.now(),threat_status = 'Undefined',
+                                                                ))
+                    await session.commit()
+                except Exception as e:
+                    print(f'Error while inserting into users_threat- {e}')
+
+        #Возвращается та же самая угроза, только в словаре еще хранится её id, а также список пользователей, которым надо ее отправить
+        print(f'refreshed threat user ids - {threat["user id"]}')
         return threat
             
             

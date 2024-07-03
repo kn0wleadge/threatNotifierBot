@@ -17,6 +17,7 @@ from tgbot.services.softwareListStrToTuple import softwareListStrToTuple
 from tgbot.database.requests import check_if_user_exists_and_create, add_first_users_software_list,check_if_user_exists
 from tgbot.database.create_user_application import create_application
 from tgbot.database.check_user_application import check_user_application
+from tgbot.database.check_user_soft import check_user_soft
 
 from bot_init import bot,dp
 
@@ -35,6 +36,7 @@ class Reg(StatesGroup):
 
 @StartRouter.message(CommandStart())
 async def cmd_start(message: Message):
+
     user = await check_if_user_exists(message.from_user.id)
     print(f'is user exists? - {user}')
     if not user:
@@ -61,7 +63,7 @@ async def cmd_start(message: Message):
             
             str = f"Следующий пользователь отправил заявку на использование бота.\nИмя пользователя - {application['name']}\nДата заявки - {application['date']}"
             for admin_id in admin_list:
-                print(admin_id)
+                print(f"id админа - {admin_id}")
                 await bot.send_message(chat_id= admin_id, text = str
                                        ,reply_markup=builder.as_markup())
         else:
@@ -77,8 +79,8 @@ async def cmd_start(message: Message):
 #TODO - продумать ситуацию, если человек нажал ввести список ПО, но при этом не ввёл его
 async def software_input(message: Message, state: FSMContext):
     #проверка пользователя на существование и добавление(если надо)
-    is_user_new = await check_if_user_exists_and_create(message.from_user.id)
-    if(not is_user_new):
+    user_entered_soft = await check_user_soft(message.from_user.id)
+    if(not user_entered_soft):
         await state.set_state(Reg.software_input_state)
         await message.answer('Введите список ПО. Ведите перечисление строго через запятую, без пробелов, названия ПО должны начинаться с большой буквы.',
                             reply_markup= None)

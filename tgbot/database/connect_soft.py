@@ -10,7 +10,7 @@ from tgbot.services.find_soft_in_description import find_soft_in_description
 
 async def connect_soft(threat_url:str):
     async with async_session() as session:
-        print('connecting threat to some soft...')
+        print('connect:softconnecting threat to some soft...')
         soft_names = await get_all_soft()
         threat_info = (await session.execute(select(Threat.description,Threat.id).where(Threat.url == threat_url))).one()
         threat_soft = await find_soft_in_description(threat_info[0],soft_names)

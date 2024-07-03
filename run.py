@@ -30,7 +30,7 @@ async def scheduled_task():
     print(f"count of threats - {len(threats_info)}")
     for threat in threats_info:
         
-        #Отправка пользователю информации об угрозе
+        #Отправка пользователям информации об угрозе
         print("Sending info")
         await send_threat(threat)
 
