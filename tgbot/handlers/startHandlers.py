@@ -90,7 +90,7 @@ async def software_input(message: Message, state: FSMContext):
 
 @StartRouter.message(F.text == 'Шпион бот начать')
 #TODO - продумать ситуацию, если человек нажал ввести список ПО, но при этом не ввёл его
-async def software_input(message: Message, state: FSMContext):
+async def software_input(message: Message):
     await message.answer(text = 'пошел нахуй')
         
 @StartRouter.message(Reg.software_input_state)

@@ -18,14 +18,22 @@ from tgbot.database.create_user import create_user
 from tgbot.database.decline_user import decline_user
 from tgbot.database.update_threat_accept import update_threat_accept
 from tgbot.database.update_threat_decline import update_threat_decline
+from tgbot.database.add_solution import add_solution
+
+
 from tgbot.handlers.startHandlers import UserApplicationCallbackData
 from tgbot.services.send_threat import ThreatCallbackData
+from tgbot.database.current_threats import CurrentThreatCallbackData
 from bot_init import bot,dp
 
 import datetime
 
 import os
-#ПЕРЕИМЕНОВАТЬ ФАЙЛ
+
+class InputtingSolution(StatesGroup):
+    threat_id = State()
+    solution = State()
+
 
 CallbackRouter = Router()
 
@@ -60,3 +68,23 @@ async def decline_threat(query:CallbackQuery, callback_data: ThreatCallbackData)
     print('Threat declined')
     await bot.edit_message_text(text = "Угроза пропущена",chat_id = query.message.chat.id, message_id=query.message.message_id)
     await update_threat_decline(query.message.chat.id, callback_data.id)
+
+
+@CallbackRouter.callback_query(CurrentThreatCallbackData.filter(F.id > 0))
+async def input_solve(query:CallbackQuery, callback_data: ThreatCallbackData, state:FSMContext):
+    print('Tapped on Input solve')
+    await state.set_state(InputtingSolution.solution)
+    await state.update_data(threat_id = callback_data.id)
+    await query.message.answer('Введите всю необходимую информацию о том, как вы устранили эту уязвимость')
+
+@CallbackRouter.message(InputtingSolution.solution)
+async def inputting_solve(message:Message, state:FSMContext):
+    print('Inputting solution')
+    threat_data = await state.get_data()
+    
+    await state.update_data(solution = message.text)
+    await add_solution(tg_id=message.chat.id,threat_id=threat_data['threat_id'] ,solution=message.text)
+    await message.answer('Информация записана!', 
+                         reply_markup=None)
+    
+    await state.clear()

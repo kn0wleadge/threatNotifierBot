@@ -8,7 +8,7 @@ import datetime
 from sqlalchemy import select, insert, update
 from sqlalchemy.orm import make_transient
 class CurrentThreatCallbackData(CallbackData, prefix = 'Current threat'):
-                threat_id:int
+                id:int
 
 
 async def current_threats(tg_id):
@@ -32,7 +32,7 @@ async def current_threats(tg_id):
             counter = counter + 1
             builder = InlineKeyboardBuilder()   
             builder.button(text = "Подробнее 📄", url =(row.url))
-            builder.button(text = "Отправить решение ✅", callback_data = CurrentThreatCallbackData(threat_id = (row.id)).pack())
+            builder.button(text = "Отправить решение ✅", callback_data = CurrentThreatCallbackData(id = (row.id)).pack())
             builder.adjust(1)
             threat = {}
             threat['builder'] = builder
