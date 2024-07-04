@@ -39,7 +39,7 @@ async def checkCurrentSoftwareList(message:Message,state:FSMContext):
 
 
 @DefaultRouter.message(Command('change_softlist'))
-async def anotherfunc(message:Message,state:FSMContext):
+async def change_softlist_command(message:Message,state:FSMContext):
     """
     Обработчик команды /change_softlist.
     @/change_softlist - ожидает ввод нового списка ПО, после чего закрепляет его за пользователем
@@ -53,7 +53,7 @@ async def anotherfunc(message:Message,state:FSMContext):
         await message.answer('Вы не ввели список используемого ПО. Воспользуйтесь командой /start и нажмите на кнопку "Ввести список ПО" ')
 
 @DefaultRouter.message(Reg.software_change_state)
-async def anotherfunc(message:Message,state:FSMContext):
+async def changing_softlist(message:Message,state:FSMContext):
     print('registrating new soft')
     data = message.text
     software_list = softwareListStrToTuple(data)
@@ -64,12 +64,12 @@ async def anotherfunc(message:Message,state:FSMContext):
     await state.clear()
 
 @DefaultRouter.message(Command('help'))
-async def anotherfunc(message:Message):
+async def help_command(message:Message):
     print('help command')
     await message.answer('Этот бот будет оперативно отправлять вам информацию о новых угрозах, которые публикуются на онлайн-порталах угроз информационной безопасности. Перечень команд:\n/help -справочная информация\n/softlist - актуальный список выбранного вами ПО\n/change_softlist - изменить список ПО\n/threats - вывести угрозы, находящиеся в обработке\n/all_threats - вывести список всех решенных угроз')
 
 @DefaultRouter.message(Command('threats'))
-async def anotherfunc(message:Message):
+async def threats_command(message:Message):
     #TODO - предусмотреть возможность отправки огромного количество угроз
     print('help command')
     threats = await current_threats(message.chat.id)

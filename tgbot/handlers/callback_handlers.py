@@ -4,22 +4,18 @@ from aiogram.types import Message,CallbackQuery
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.context import FSMContext
 from aiogram.methods.send_message import SendMessage
+from aiogram.types import Message, ReplyKeyboardRemove
 
 from tgbot.keyboards.startKeyboards import startKeyboard
-from tgbot.keyboards.defaultKeyboards import defaultKeyboard
-from tgbot.keyboards.application_keyboard import application_markup
+from tgbot.keyboards.threat_solution_keyboard import threat_solution_keyboard
 
-from tgbot.services.softwareListStrToTuple import softwareListStrToTuple
-
-from tgbot.database.requests import check_if_user_exists_and_create, add_first_users_software_list,check_if_user_exists
-from tgbot.database.create_user_application import create_application
-from tgbot.database.check_user_application import check_user_application
+from tgbot.handlers.defaultHandlers import help_command
 from tgbot.database.create_user import create_user
 from tgbot.database.decline_user import decline_user
 from tgbot.database.update_threat_accept import update_threat_accept
 from tgbot.database.update_threat_decline import update_threat_decline
 from tgbot.database.add_solution import add_solution
-
+from tgbot.database.threat_rec_solution import threat_rec_solution
 
 from tgbot.handlers.startHandlers import UserApplicationCallbackData
 from tgbot.services.send_threat import ThreatCallbackData
@@ -75,16 +71,26 @@ async def input_solve(query:CallbackQuery, callback_data: ThreatCallbackData, st
     print('Tapped on Input solve')
     await state.set_state(InputtingSolution.solution)
     await state.update_data(threat_id = callback_data.id)
-    await query.message.answer('Введите всю необходимую информацию о том, как вы устранили эту уязвимость')
+    await query.message.answer('Введите всю необходимую информацию о том, как вы устранили эту уязвимость', reply_markup= threat_solution_keyboard)
 
 @CallbackRouter.message(InputtingSolution.solution)
 async def inputting_solve(message:Message, state:FSMContext):
     print('Inputting solution')
-    threat_data = await state.get_data()
-    
-    await state.update_data(solution = message.text)
-    await add_solution(tg_id=message.chat.id,threat_id=threat_data['threat_id'] ,solution=message.text)
+    if message.text == 'Назад ⬅️':
+        print('Back command')
+        await message.answer('Этот бот будет оперативно отправлять вам информацию о новых угрозах, которые публикуются на онлайн-порталах угроз информационной безопасности. Перечень команд:\n/help -справочная информация\n/softlist - актуальный список выбранного вами ПО\n/change_softlist - изменить список ПО\n/threats - вывести угрозы, находящиеся в обработке\n/all_threats - вывести список всех решенных угроз',
+                              reply_markup=ReplyKeyboardRemove())
+    elif message.text == 'Угроза устранена рекомендованным способом ✅':
+        print('rec solve command')
+        current_threat = await state.get_data()
+        rec_solution = await threat_rec_solution(current_threat['threat_id'])
+        print(f" recommended solution - {rec_solution}")
+        await add_solution(tg_id = message.chat.id, threat_id = current_threat['threat_id'], solution = rec_solution)
+    else:
+        threat_data = await state.get_data()
+        await state.update_data(solution = message.text)
+        await add_solution(tg_id=message.chat.id,threat_id=threat_data['threat_id'] ,solution=message.text)
+        
     await message.answer('Информация записана!', 
-                         reply_markup=None)
-    
+                            reply_markup=ReplyKeyboardRemove())
     await state.clear()
