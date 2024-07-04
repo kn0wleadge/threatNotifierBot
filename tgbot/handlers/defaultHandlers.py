@@ -10,7 +10,10 @@ from tgbot.services.softwareListStrToTuple import softwareListStrToTuple
 
 from tgbot.database.requests import get_users_softlist,check_if_user_registrated, change_users_softlist
 from tgbot.database.current_threats import current_threats
+from tgbot.database.all_solved_threats import all_solved_threats
+from tgbot.keyboards.all_threats_keyboard import all_threats_keyboard
 import tgbot.keyboards.defaultKeyboards as kb
+
 
 class Reg(StatesGroup):
     software_change_state = State()
@@ -71,8 +74,26 @@ async def help_command(message:Message):
 @DefaultRouter.message(Command('threats'))
 async def threats_command(message:Message):
     #TODO - предусмотреть возможность отправки огромного количество угроз
-    print('help command')
+    print('threats')
     threats = await current_threats(message.chat.id)
     await message.answer(text = "Список обрабатываемых угроз:")
     for threat in threats:        
         await message.answer(text = threat['message'], reply_markup=threat['builder'].as_markup())
+
+@DefaultRouter.message(Command('all_threats'))
+async def all_threats_command(message:Message):
+    #TODO - предусмотреть возможность отправки огромного количество угроз
+    print('all_threats')
+
+    await message.answer(text = "Список устраненных угроз:",
+                         reply_markup=all_threats_keyboard)
+    solved_threats = await all_solved_threats(message.chat.id)
+    threat_counter = 0
+    for threat in solved_threats:
+        threat_counter = threat_counter + 1     
+        print(solved_threats)
+        try:
+
+            await message.answer(text = f'{threat_counter}' + ')'+'BDU' + threat.url[25:] + '\n' + 'Описание угрозы:\n' + threat.description + '\nДата устранения:\n' + threat.solve_date.strftime("%m/%d/%Y, %H:%M:%S") + '\nОписание устранения уязвимости:\n' + threat.threat_solution)
+        except Exception as e:
+            print(f'all_threats_command - {e}')
