@@ -4,4 +4,5 @@ all_threats_keyboard = ReplyKeyboardMarkup(keyboard = [
     [KeyboardButton(text = 'Отчет по всем устраненным угрозам')]
   
 ],
+resize_keyboard = True
 )
